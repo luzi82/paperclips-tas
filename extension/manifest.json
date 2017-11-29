@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+
+  "name": "Getting started example",
+  "description": "This extension allows the user to change the background color of the current page.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html",
+    "default_title": "Click here!"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "content_scripts" : [
+      {
+          "matches" : [ "http://www.decisionproblem.com/paperclips/index2.html"],
+          "js" : ["inject.js"]
+      }
+  ],
+  "web_accessible_resources":["main.js"]
+}
