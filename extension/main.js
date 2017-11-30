@@ -6,7 +6,7 @@ function PaperclipTasMain(){
         //console.log("UQTNBIZP unsoldClips="+unsoldClips);
         this.tickNow = Date.now();
         this.autoPrice();
-        this.autoQ();
+        this.autoQuantum();
     };
     
     this.autoPriceCooldown = 0;
@@ -25,7 +25,7 @@ function PaperclipTasMain(){
         }
     };
     
-    this.autoQ=function(){
+    this.autoQuantum=function(){
         var calQ = this.calQComp();
         if(calQ>0){
             qComp();
@@ -43,9 +43,9 @@ function PaperclipTasMain(){
     };
     
     this.start=function(){
-        var tthis = this;
-        setInterval(function(){tthis.tick();},200);
-        console.log("Paperclips TAS started");
+        var _this = this;
+        setInterval(function(){_this.tick();},200);
+        console.log("Paperclips TAS start");
     };
 
 }
