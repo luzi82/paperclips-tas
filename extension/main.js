@@ -41,3 +41,5 @@ function calQComp(){
 }
 
 setInterval(tick,200);
+
+console.log("Paperclips TAS started");
