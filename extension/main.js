@@ -13,6 +13,7 @@ function PaperclipTasMain(){
         
         // earth
         this.autoMakeFarm();
+        this.autoEarth();
         
         // common
         this.autoQuantum();
@@ -122,7 +123,7 @@ function PaperclipTasMain(){
         if(operations<standardOps)return;
         newTourney();
         runTourney();
-    }
+    };
     
     this.autoMakeFarm = function(){
         if(this.stage!="earth")return;
@@ -135,17 +136,65 @@ function PaperclipTasMain(){
         diff /= (farmRate/100);
         diff = Math.ceil(diff);
         makeFarm(diff);
-    }
+    };
     
     this.calPowerSupply=function(){
         return farmLevel * farmRate/100;
-    }
+    };
     this.calPowerDemand=function(){
         var dDemand = (harvesterLevel * dronePowerRate/100) + (wireDroneLevel * dronePowerRate/100);
         var fDemand = (factoryLevel * factoryPowerRate/100);
         var demand = dDemand + fDemand;
         return demand;
-    }
+    };
+    
+    this.autoEarth=function(){
+        if(this.stage!="earth")return;
+        if(harvesterFlag==0)return;
+        if(wireProductionFlag==0)return;
+        if(wireDroneFlag==0)return;
+        if(factoryFlag==0)return;
+
+        var factoryOutput = this.calFactoryOutput();
+        var harvesterOutput = this.calHarvesterOutput();
+        var wireOutput = this.calWireOutput();
+        
+        var outputMin = Math.min(factoryOutput,harvesterOutput,wireOutput);
+        if((wireOutput<=outputMin)&&(unusedClips>=wireDroneCost)){
+            makeWireDrone(1);
+        }
+        if((harvesterOutput<=outputMin)&&(unusedClips>=harvesterCost)){
+            makeHarvester(1);
+        }
+        if((factoryOutput<=outputMin)&&(unusedClips>=factoryCost)){
+            makeFactory();
+        }
+    };
+    this.calFactoryOutput=function(){
+        var fbst = 1;
+        if (factoryBoost > 1){
+            fbst = factoryBoost * factoryLevel;
+        }      
+        return powMod*fbst*(Math.floor(factoryLevel)*factoryRate);
+    };
+    this.calHarvesterOutput=function(){
+        var dbsth = 1;
+        if (droneBoost>1){
+            dbsth = droneBoost * Math.floor(harvesterLevel);
+        }
+        var mtr = powMod*dbsth*Math.floor(harvesterLevel)*harvesterRate;
+        mtr = mtr * ((200-sliderPos)/100);
+        return mtr;
+    };
+    this.calWireOutput=function(){
+        var dbstw = 1;
+        if (droneBoost>1){
+            dbstw = droneBoost * Math.floor(wireDroneLevel);
+        }
+        var a = powMod*dbstw*Math.floor(wireDroneLevel)*wireDroneRate;
+        a = a * ((200-sliderPos)/100);
+        return a;
+    };
     
     this.start=function(){
         var _this = this;
