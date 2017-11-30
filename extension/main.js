@@ -183,8 +183,23 @@ function PaperclipTasMain(){
                 makeWireDrone(1);
             }
         }
-        if((factoryOutput<=outputMin)&&(unusedClips>=factoryCost)){
-            makeFactory();
+        if(factoryOutput<=outputMin){
+            var shouldMarkFactory = false;
+            while(1){ // for break
+                if(activeProjects.indexOf(project102)>=0){
+                    if(outputMin*60>=1000000000000000000000){
+                        shouldMarkFactory = false;
+                        break;
+                    }
+                }
+                if(unusedClips<factoryCost){
+                    shouldMarkFactory = false;
+                    break;
+                }
+                shouldMarkFactory = true;
+                break;
+            }
+            if(shouldMarkFactory)makeFactory();
         }
     };
     this.calFactoryOutput=function(_factoryLevel){
