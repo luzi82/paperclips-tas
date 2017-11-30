@@ -5,11 +5,17 @@ function PaperclipTasMain(){
         //console.log("UQTNBIZP unsoldClips="+unsoldClips);
         this.tickBegin();
         
+        // human
         this.autoClipClick();
         this.autoBuyWire();
         this.autoPrice();
-        this.autoQuantum();
         this.highlightBestCliper();
+        
+        // earth
+        this.autoMakeFarm();
+        
+        // common
+        this.autoQuantum();
         this.autoTournament();
     };
 
@@ -118,6 +124,28 @@ function PaperclipTasMain(){
         runTourney();
     }
     
+    this.autoMakeFarm = function(){
+        if(this.stage!="earth")return;
+        if(project127.flag==0)return;
+        if(unusedClips<farmCost)return;
+        var supply = this.calPowerSupply();
+        var demand = this.calPowerDemand();
+        var diff = demand - supply;
+        if(diff<=0)return;
+        diff /= (farmRate/100);
+        diff = Math.ceil(diff);
+        makeFarm(diff);
+    }
+    
+    this.calPowerSupply=function(){
+        return farmLevel * farmRate/100;
+    }
+    this.calPowerDemand=function(){
+        var dDemand = (harvesterLevel * dronePowerRate/100) + (wireDroneLevel * dronePowerRate/100);
+        var fDemand = (factoryLevel * factoryPowerRate/100);
+        var demand = dDemand + fDemand;
+        return demand;
+    }
     
     this.start=function(){
         var _this = this;
