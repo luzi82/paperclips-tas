@@ -110,7 +110,7 @@ function PaperclipTasMain(){
     };
     
     this.autoTournament = function(){
-        if(autoTourneyFlag==0)return;
+        if(strategyEngineFlag==0)return;
         if(tourneyInProg==1)return;
         if(operations<tourneyCost)return;
         if(operations<standardOps)return;
