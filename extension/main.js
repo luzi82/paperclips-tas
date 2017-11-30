@@ -9,6 +9,7 @@ function PaperclipTasMain(){
         this.autoBuyWire();
         this.autoPrice();
         this.autoQuantum();
+        this.highlightBestCliper();
     };
 
     this.tickNow = 0;
@@ -58,6 +59,9 @@ function PaperclipTasMain(){
         }else if((!positive) && (clipLevel<2)){
             raisePrice();
             this.autoPriceCooldown = this.tickNow+1000;
+        }else if(clipLevel<0.5){
+            raisePrice();
+            this.autoPriceCooldown = this.tickNow+1000;
         }
     };
     
@@ -77,6 +81,33 @@ function PaperclipTasMain(){
         var qq = Math.ceil(q*360);
         return qq;
     };
+
+    this.autoClipperDivElement = document.getElementById("autoClipperDiv");
+    this.megaClipperDivElement = document.getElementById("megaClipperDiv");
+    this.highlightBestCliper=function(){
+        if(this.stage!="human")return;
+        if(megaClipperFlag==0){
+            this.autoClipperDivElement.style.backgroundColor="white";
+            return;
+        }
+        var autoClipperCp = this.calAutoClipperRate() / clipperCost;
+        var megaClipperCp = this.calMegaClipperRate() / megaClipperCost;
+        if(megaClipperCp>autoClipperCp){
+            this.autoClipperDivElement.style.backgroundColor="white";
+            this.megaClipperDivElement.style.backgroundColor="yellow";
+        }else{
+            this.autoClipperDivElement.style.backgroundColor="yellow";
+            this.megaClipperDivElement.style.backgroundColor="white";
+        }
+    };
+    
+    this.calAutoClipperRate = function(){
+        return clipperBoost/100;
+    };
+    this.calMegaClipperRate = function(){
+        return megaClipperBoost*5;
+    };
+    
     
     this.start=function(){
         var _this = this;
