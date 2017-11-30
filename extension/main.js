@@ -10,6 +10,7 @@ function PaperclipTasMain(){
         this.autoPrice();
         this.autoQuantum();
         this.highlightBestCliper();
+        this.autoTournament();
     };
 
     this.tickNow = 0;
@@ -107,6 +108,15 @@ function PaperclipTasMain(){
     this.calMegaClipperRate = function(){
         return megaClipperBoost*5;
     };
+    
+    this.autoTournament = function(){
+        if(autoTourneyFlag==0)return;
+        if(tourneyInProg==1)return;
+        if(operations<tourneyCost)return;
+        if(operations<standardOps)return;
+        newTourney();
+        runTourney();
+    }
     
     
     this.start=function(){
