@@ -40,7 +40,7 @@ function PaperclipTasMain(){
         if(wire<1)return true;
         if(clipRate<=0)return false;
         if(wireCost>Math.ceil(wireBasePrice-5))return false; // hardcode
-        if(wire/clipRate>30)return false; // hardcode
+        if(wire/clipRate>60)return false; // hardcode
         return true;
     }
     
