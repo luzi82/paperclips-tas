@@ -14,6 +14,7 @@ function PaperclipTasMain(){
         this.autoBuyWire();
         this.autoPrice();
         this.highlightBestCliper();
+        this.autoBuyCliper();
         
         // earth
         this.autoMakeFarm();
@@ -61,6 +62,7 @@ function PaperclipTasMain(){
         
         // buy wire in condition
         do{ // for skip
+            if(funds<wireCost)return;
             if(wire<1)break;
             if(clipRate<=0)return;
             if(wireCost>Math.ceil(wireBasePrice-5))return; // hardcode
@@ -114,14 +116,25 @@ function PaperclipTasMain(){
             this.autoClipperDivElement.style.backgroundColor="white";
             return;
         }
-        var autoClipperCp = this.calAutoClipperRate() / clipperCost;
-        var megaClipperCp = this.calMegaClipperRate() / megaClipperCost;
-        if(megaClipperCp>autoClipperCp){
+        var bestClipper = this.calBestClipper();
+        if(bestClipper=="megaclipper"){
             this.autoClipperDivElement.style.backgroundColor="white";
             this.megaClipperDivElement.style.backgroundColor="yellow";
         }else{
             this.autoClipperDivElement.style.backgroundColor="yellow";
             this.megaClipperDivElement.style.backgroundColor="white";
+        }
+    };
+    this.autoBuyCliper=function(){
+        if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_clipper"))return;
+        if(this.stage!="human")return;
+        var bestClipper = this.calBestClipper();
+        if(bestClipper=="megaclipper"){
+            if(funds<(wireCost+megaClipperCost))return;
+            makeMegaClipper();
+        }else{
+            if(funds<(wireCost+clipperCost))return;
+            makeClipper();
         }
     };
     
@@ -130,6 +143,18 @@ function PaperclipTasMain(){
     };
     this.calMegaClipperRate = function(){
         return megaClipperBoost*5;
+    };
+    this.calBestClipper=function(){
+        if(megaClipperFlag==0){
+            return "autoclipper";
+        }
+        var autoClipperCp = this.calAutoClipperRate() / clipperCost;
+        var megaClipperCp = this.calMegaClipperRate() / megaClipperCost;
+        if(autoClipperCp>megaClipperCp){
+            return "megaclipper";
+        }else{
+            return "autoclipper";
+        }
     };
     
     this.autoTournament = function(){
@@ -267,6 +292,7 @@ function PaperclipTasMain(){
     
     this.ctrlDefault={
         pctas_ctrl_human_auto_buy_wire: true,
+        pctas_ctrl_human_auto_buy_clipper: true,
     };
 
 }
