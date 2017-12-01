@@ -121,7 +121,7 @@ function PaperclipTasMain(){
         if(bestClipper=="megaclipper"){
             this.autoClipperDivElement.style.backgroundColor="white";
             this.megaClipperDivElement.style.backgroundColor="yellow";
-        }else{
+        }else if(bestClipper=="autoclipper"){
             this.autoClipperDivElement.style.backgroundColor="yellow";
             this.megaClipperDivElement.style.backgroundColor="white";
         }
@@ -133,12 +133,12 @@ function PaperclipTasMain(){
         // buy market
         var shouldBuyMarket=false;
         do{
-            if((clipRate-avgSales)&&(margin<0.015)){shouldBuyMarket=true;break;} // over produce
+            if(((clipRate-avgSales)>0)&&(margin<0.015)){shouldBuyMarket=true;break;} // over produce
             var maxClipperCost = clipperCost;
             if(megaClipperFlag==1){
                 maxClipperCost=Math.max(maxClipperCost,megaClipperCost);
             }
-            if(adCost<megaClipperCost){shouldBuyMarket=true;break;}
+            if(adCost<maxClipperCost){shouldBuyMarket=true;break;}
         }while(false);
         if(shouldBuyMarket){
             if(funds<(adCost+wireCost))return;
@@ -151,7 +151,7 @@ function PaperclipTasMain(){
         if(bestClipper=="megaclipper"){
             if(funds<(wireCost+megaClipperCost))return;
             makeMegaClipper();
-        }else{
+        }else if(bestClipper=="autoclipper"){
             if(funds<(wireCost+clipperCost))return;
             makeClipper();
         }
@@ -164,6 +164,9 @@ function PaperclipTasMain(){
         return megaClipperBoost*5;
     };
     this.calBestClipper=function(){
+        if(autoClipperFlag==0){
+            return "none";
+        }
         if(megaClipperFlag==0){
             return "autoclipper";
         }
