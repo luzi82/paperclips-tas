@@ -52,6 +52,7 @@ function PaperclipTasMain(){
     
     this.autoBuyWire=function(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_wire"))return;
+        if(this.stage!="human")return;
         
         // turn off wirebuyer
         if((wireBuyerFlag==1)&&(wireBuyerStatus==1)){
@@ -60,7 +61,6 @@ function PaperclipTasMain(){
         
         // buy wire in condition
         do{ // for skip
-            if(this.stage!="human")return;
             if(wire<1)break;
             if(clipRate<=0)return;
             if(wireCost>Math.ceil(wireBasePrice-5))return; // hardcode
