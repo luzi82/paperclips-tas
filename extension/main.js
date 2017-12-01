@@ -192,8 +192,8 @@ function PaperclipTasMain(){
         }
         
         if((pick=="10")||(pick==10))return;
-        newTourney();
-        runTourney();
+        if(!(btnNewTournamentElement.disabled)){newTourney();}
+        if(!(btnRunTournamentElement.disabled)){runTourney();}
     };
     
     this.autoMakeFarm = function(){
