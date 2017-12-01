@@ -15,5 +15,8 @@
           "js" : ["inject.js"]
       }
   ],
-  "web_accessible_resources":["main.js"]
+    "web_accessible_resources":[
+        "main.js",
+        "main.html"
+    ]
 }

@@ -3,6 +3,8 @@ function PaperclipTasMain(){
     this.tick=function(){
         //console.log("GOBAUPRZ humanFlag="+humanFlag);
         //console.log("UQTNBIZP unsoldClips="+unsoldClips);
+        if(document.getElementById("pctas_main")==null)return;
+
         this.tickBegin();
         
         // human
@@ -22,6 +24,7 @@ function PaperclipTasMain(){
 
     this.tickNow = 0;
     this.stage = "unknown";
+    this.mainHtmlLoaded = false;
     this.tickBegin=function(){
         this.tickNow = Date.now();
         if(humanFlag==1){
@@ -45,6 +48,7 @@ function PaperclipTasMain(){
         }
     }
     this.shouldBuyWire=function(){
+        if(!this.get_ctrl_bool("pctas_ctrl_human_auto_buy_wire"))return false;
         if(this.stage!="human")return false;
         if(wire<1)return true;
         if(clipRate<=0)return false;
@@ -226,6 +230,10 @@ function PaperclipTasMain(){
         var a = powMod*dbstw*Math.floor(_wireDroneLevel)*wireDroneRate;
         a = a * ((200-sliderPos)/100);
         return a;
+    };
+    
+    this.get_ctrl_bool=function(key){
+        return document.getElementById(key).checked;
     };
     
     this.start=function(){
