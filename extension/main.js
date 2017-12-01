@@ -279,8 +279,12 @@ function PaperclipTasMain(){
         if(harvesterOutput<=outputMin){
             if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+999)<outputMax)){
                 makeHarvester(1000);
+            }else if(unusedClips>=p1000h){
+                makeHarvester(100);
             }else if((unusedClips>=p100h)&&(this.calHarvesterOutput(harvesterLevel+99)<outputMax)){
                 makeHarvester(100);
+            }else if(unusedClips>=p100h){
+                makeHarvester(10);
             }else if((unusedClips>=p10h)&&(this.calHarvesterOutput(harvesterLevel+9)<outputMax)){
                 makeHarvester(10);
             }else if(unusedClips>=harvesterCost){
@@ -290,8 +294,12 @@ function PaperclipTasMain(){
         if(wireOutput<=outputMin){
             if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+999)<outputMax)){
                 makeWireDrone(1000);
+            }else if(unusedClips>=p1000w){
+                makeWireDrone(100);
             }else if((unusedClips>=p100w)&&(this.calWireOutput(wireDroneLevel+99)<outputMax)){
                 makeWireDrone(100);
+            }else if(unusedClips>=p100w){
+                makeWireDrone(10);
             }else if((unusedClips>=p10w)&&(this.calWireOutput(wireDroneLevel+9)<outputMax)){
                 makeWireDrone(10);
             }else if(unusedClips>=wireDroneCost){
