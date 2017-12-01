@@ -23,6 +23,7 @@ function PaperclipTasMain(){
         // common
         this.autoQuantum();
         this.autoTournament();
+        this.watchScore();
         
         this.tickEnd();
     };
@@ -191,10 +192,46 @@ function PaperclipTasMain(){
             toggleAutoTourney();
         }
         
-        if((pick=="10")||(pick==10))return;
+        if((pick=="10")||(pick==10)){
+            pick = 0;
+            stratPickerElement.value=0;
+        }
         if(!(btnNewTournamentElement.disabled)){newTourney();}
         if(!(btnRunTournamentElement.disabled)){runTourney();}
     };
+    
+    this.lastWatch_tourneyLvl = 0;
+    this.watchScore = function(){
+        if(!this.getCtrlBool("pctas_ctrl_common_auto_strat"))return;
+        if(strategyEngineFlag==0)return;
+
+        if(tourneyInProg==0)return;
+        if(tourneyLvl==this.lastWatch_tourneyLvl)return;
+        if(currentRound<rounds-2)return;
+        this.hackScoreLoop_tourneyLvl=tourneyLvl;
+        var _this=this;
+        setTimeout(function(){_this.hackScoreLoop();},10);
+        this.lastWatch_tourneyLvl=tourneyLvl;
+    };
+
+    this.hackScoreLoop_tourneyLvl=0;
+    this.hackScoreLoop=function(){
+        if(tourneyInProg==0)return;
+        if(tourneyLvl!=this.hackScoreLoop_tourneyLvl)return;
+        var bestPick = 0;
+        var bestPickScore = -1;
+        var ii;
+        for(ii=0;ii<strats.length;ii++){
+            var score = strats[ii].currentScore;
+            if(score<=bestPickScore)continue;
+            bestPickScore=score;
+            bestPick=ii;
+        }
+        pick = bestPick;
+        stratPickerElement.value=bestPick;
+        var _this=this;
+        setTimeout(function(){_this.hackScoreLoop();},10);
+    }
     
     this.autoMakeFarm = function(){
         if(this.stage!="earth")return;
@@ -322,6 +359,7 @@ function PaperclipTasMain(){
     
     this.ctrlDefault={
         pctas_ctrl_common_auto_yomi: true,
+        pctas_ctrl_common_auto_strat: true,
 
         pctas_ctrl_human_auto_buy_wire: true,
         pctas_ctrl_human_auto_buy_clipper: true,
