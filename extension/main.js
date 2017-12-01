@@ -20,6 +20,10 @@ function PaperclipTasMain(){
         this.autoMakeFarm();
         this.autoEarth();
         
+        // space
+        this.autoSpace();
+        this.autoSpaceProcessor();
+        
         // common
         this.autoQuantum();
         this.autoTournament();
@@ -239,7 +243,7 @@ function PaperclipTasMain(){
         if(unusedClips<farmCost)return;
         var supply = this.calPowerSupply();
         var demand = this.calPowerDemand();
-        var diff = demand - supply;
+        var diff = demand + (factoryPowerRate/100) - supply;
         if(diff<=0)return;
         diff /= (farmRate/100);
         diff = Math.ceil(diff);
@@ -257,11 +261,14 @@ function PaperclipTasMain(){
     };
     
     this.autoEarth=function(){
+        if(!this.getCtrlBool("pctas_ctrl_earth_autoearth"))return;
         if(this.stage!="earth")return;
         if(harvesterFlag==0)return;
         if(wireProductionFlag==0)return;
         if(wireDroneFlag==0)return;
         if(factoryFlag==0)return;
+        if(availableMatter<=0)return;
+        if(this.calPowerSupply()<this.calPowerDemand())return;
 
         var factoryOutput = this.calFactoryOutput(factoryLevel);
         var harvesterOutput = this.calHarvesterOutput(harvesterLevel);
@@ -292,22 +299,22 @@ function PaperclipTasMain(){
             }
         }
         if(factoryOutput<=outputMin){
-            var shouldMarkFactory = false;
-            while(1){ // for break
-                if(activeProjects.indexOf(project102)>=0){
-                    if(outputMin*60>=1000000000000000000000){
-                        shouldMarkFactory = false;
-                        break;
+            if((swarmFlag==1)&&(parseInt(sliderPos)<199)){
+                sliderPos=parseInt(sliderPos);
+                sliderPos+=10;
+                sliderPos=Math.min(199,sliderPos);
+                sliderElement.value=sliderPos;
+            }else{
+                do{ // for break
+                    if(activeProjects.indexOf(project102)>=0){
+                        if(outputMin*60>=1000000000000000000000){
+                            break;
+                        }
                     }
-                }
-                if(unusedClips<factoryCost){
-                    shouldMarkFactory = false;
-                    break;
-                }
-                shouldMarkFactory = true;
-                break;
+                    if(unusedClips<factoryCost){break;}
+                    makeFactory();
+                }while(false);
             }
-            if(shouldMarkFactory)makeFactory();
         }
     };
     this.calFactoryOutput=function(_factoryLevel){
@@ -334,6 +341,93 @@ function PaperclipTasMain(){
         var a = powMod*dbstw*Math.floor(_wireDroneLevel)*wireDroneRate;
         a = a * ((200-sliderPos)/100);
         return a;
+    };
+    this.calXRateOutput=function(){
+        return Math.floor(probeCount) * probeXBaseRate * probeSpeed * probeNav;
+    };
+    
+    this.autoSpaceTimeout=0;
+    this.autoSpace=function(){
+        if(this.stage!="space")return;
+        if(this.tickNow<this.autoSpaceTimeout)return;
+        var tarSpeed=1;
+        var tarNav=1;
+        var tarRep=0;
+        var tarHaz=0;
+        var tarFac=0;
+        var tarHarv=0;
+        var tarWire=0;
+        var tarCombat=0;
+        
+        var remainTrust = probeTrust;
+        remainTrust-=tarSpeed;
+        remainTrust-=tarNav;
+        if(project131.flag==1){
+            tarCombat=6;
+            remainTrust-=tarCombat;
+        }
+        
+        var xRateOutput = this.calXRateOutput();
+        var harvesterOutput = this.calHarvesterOutput(harvesterLevel);
+        var wireOutput = this.calWireOutput(wireDroneLevel);
+        var factoryOutput = this.calFactoryOutput(factoryLevel);
+        
+        if(wireOutput>factoryOutput){tarFac++;remainTrust--;}
+        else if(harvesterOutput>wireOutput){tarWire++;remainTrust--;}
+        else if(xRateOutput>harvesterOutput){tarHarv++;remainTrust--;}
+        
+        if(remainTrust>0){tarRep++;remainTrust--;}
+        while(remainTrust>0){
+            if(remainTrust>0){tarRep++;remainTrust--;}
+            if(remainTrust>0){tarHaz++;remainTrust--;}
+        }
+        
+        if(probeSpeed >tarSpeed ){lowerProbeSpeed();}
+        if(probeNav   >tarNav   ){lowerProbeNav();}
+        if(probeRep   >tarRep   ){lowerProbeRep();}
+        if(probeHaz   >tarHaz   ){lowerProbeHaz();}
+        if(probeFac   >tarFac   ){lowerProbeFac();}
+        if(probeHarv  >tarHarv  ){lowerProbeHarv();}
+        if(probeWire  >tarWire  ){lowerProbeWire();}
+        if(probeCombat>tarCombat){lowerProbeCombat();}
+        
+        do{
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeSpeed <tarSpeed ){raiseProbeSpeed();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeNav   <tarNav   ){raiseProbeNav();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeRep   <tarRep   ){raiseProbeRep();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeHaz   <tarHaz   ){raiseProbeHaz();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeFac   <tarFac   ){raiseProbeFac();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeHarv  <tarHarv  ){raiseProbeHarv();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeWire  <tarWire  ){raiseProbeWire();}
+            if((probeSpeed+probeNav+probeRep+probeHaz+probeFac+probeHarv+probeWire+probeCombat)>=probeTrust)break;
+            if(probeCombat<tarCombat){raiseProbeCombat();}
+        }while(false);
+
+        do{
+            if(probeSpeed !=tarSpeed ){break;}
+            if(probeNav   !=tarNav   ){break;}
+            if(probeRep   !=tarRep   ){break;}
+            if(probeHaz   !=tarHaz   ){break;}
+            if(probeFac   !=tarFac   ){break;}
+            if(probeHarv  !=tarHarv  ){break;}
+            if(probeWire  !=tarWire  ){break;}
+            if(probeCombat!=tarCombat){break;}
+            this.autoSpaceTimeout=this.tickNow+2000;
+        }while(false);
+    };
+    
+    this.autoSpaceProcessor=function(){
+        if(this.stage!="space")return;
+        if(swarmGifts>0){
+            addProc();
+        }
     };
     
     this.getCtrlBool=function(key){
@@ -363,6 +457,8 @@ function PaperclipTasMain(){
 
         pctas_ctrl_human_auto_buy_wire: true,
         pctas_ctrl_human_auto_buy_clipper: true,
+        
+        pctas_ctrl_earth_autoearth: true,
     };
 
 }
