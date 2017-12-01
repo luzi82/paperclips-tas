@@ -172,6 +172,7 @@ function PaperclipTasMain(){
     };
     
     this.autoTournament = function(){
+        if(!this.getCtrlBool("pctas_ctrl_common_auto_yomi"))return;
         if(strategyEngineFlag==0)return;
         if(tourneyInProg==1)return;
         if(operations<tourneyCost)return;
@@ -305,6 +306,8 @@ function PaperclipTasMain(){
     };
     
     this.ctrlDefault={
+        pctas_ctrl_common_auto_yomi: true,
+
         pctas_ctrl_human_auto_buy_wire: true,
         pctas_ctrl_human_auto_buy_clipper: true,
     };
