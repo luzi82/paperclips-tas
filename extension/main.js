@@ -7,6 +7,8 @@ function PaperclipTasMain(){
 
         this.tickBegin();
         
+        this.initCtrl();
+        
         // human
         this.autoClipClick();
         this.autoBuyWire();
@@ -20,11 +22,13 @@ function PaperclipTasMain(){
         // common
         this.autoQuantum();
         this.autoTournament();
+        
+        this.tickEnd();
     };
 
     this.tickNow = 0;
+    this.lastStage = "init";
     this.stage = "unknown";
-    this.mainHtmlLoaded = false;
     this.tickBegin=function(){
         this.tickNow = Date.now();
         if(humanFlag==1){
@@ -34,7 +38,11 @@ function PaperclipTasMain(){
         }else{
             this.stage = "earth";
         }
-    }
+    };
+    this.tickEnd=function(){
+        this.lastStage=this.stage;
+    };
+    
     
     this.autoClipClick=function(){
         if(this.stage!="human")return;
@@ -48,7 +56,7 @@ function PaperclipTasMain(){
         }
     }
     this.shouldBuyWire=function(){
-        if(!this.get_ctrl_bool("pctas_ctrl_human_auto_buy_wire"))return false;
+        if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_wire"))return false;
         if(this.stage!="human")return false;
         if(wire<1)return true;
         if(clipRate<=0)return false;
@@ -232,14 +240,29 @@ function PaperclipTasMain(){
         return a;
     };
     
-    this.get_ctrl_bool=function(key){
+    this.getCtrlBool=function(key){
         return document.getElementById(key).checked;
     };
+    
+    this.initCtrl=function(){
+        if(this.lastStage!="init")return;
+        for(var key in this.ctrlDefault){
+            var value = this.ctrlDefault[key];
+            var inputType = document.getElementById(key).type;
+            if(inputType=="checkbox"){
+                document.getElementById(key).checked = value;
+            }
+        }
+    }
     
     this.start=function(){
         var _this = this;
         setInterval(function(){_this.tick();},200);
         console.log("Paperclips TAS start");
+    };
+    
+    this.ctrlDefault={
+        pctas_ctrl_human_auto_buy_wire: true,
     };
 
 }
