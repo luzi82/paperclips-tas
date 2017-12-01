@@ -185,6 +185,13 @@ function PaperclipTasMain(){
         if(tourneyInProg==1)return;
         if(operations<tourneyCost)return;
         if(operations<standardOps)return;
+        
+        // turn off autoTourney
+        if((autoTourneyFlag==1)&&(autoTourneyStatus==1)){
+            toggleAutoTourney();
+        }
+        
+        if((pick=="10")||(pick==10))return;
         newTourney();
         runTourney();
     };
