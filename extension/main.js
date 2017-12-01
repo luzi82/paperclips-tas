@@ -51,18 +51,22 @@ function PaperclipTasMain(){
     };
     
     this.autoBuyWire=function(){
-        if(this.shouldBuyWire()){
-            buyWire();
+        if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_wire"))return;
+        
+        // turn off wirebuyer
+        if((wireBuyerFlag==1)&&(wireBuyerStatus==1)){
+            toggleWireBuyer();
         }
-    }
-    this.shouldBuyWire=function(){
-        if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_wire"))return false;
-        if(this.stage!="human")return false;
-        if(wire<1)return true;
-        if(clipRate<=0)return false;
-        if(wireCost>Math.ceil(wireBasePrice-5))return false; // hardcode
-        if(wire/clipRate>60)return false; // hardcode
-        return true;
+        
+        // buy wire in condition
+        do{ // for skip
+            if(this.stage!="human")return;
+            if(wire<1)break;
+            if(clipRate<=0)return;
+            if(wireCost>Math.ceil(wireBasePrice-5))return; // hardcode
+            if(wire/clipRate>60)return; // hardcode
+        }while(false);
+        buyWire();
     }
     
     this.autoPriceCooldown = 0;
