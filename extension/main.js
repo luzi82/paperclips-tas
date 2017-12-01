@@ -65,6 +65,7 @@ function PaperclipTasMain(){
             if(funds<wireCost)return;
             if(wire<1)break;
             if(clipRate<=0)return;
+            if(wire/clipRate<0.5)break;
             if(wireCost>Math.ceil(wireBasePrice-5))return; // hardcode
             if(wire/clipRate>60)return; // hardcode
         }while(false);
@@ -128,6 +129,19 @@ function PaperclipTasMain(){
     this.autoBuyCliper=function(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_buy_clipper"))return;
         if(this.stage!="human")return;
+        
+        // buy market
+        var maxClipperCost = clipperCost;
+        if(megaClipperFlag==1){
+            maxClipperCost=Math.max(maxClipperCost,megaClipperCost);
+        }
+        if(adCost<megaClipperCost){
+            if(funds<(adCost+wireCost))return;
+            buyAds();
+            return;
+        }
+        
+        // buy clipper
         var bestClipper = this.calBestClipper();
         if(bestClipper=="megaclipper"){
             if(funds<(wireCost+megaClipperCost))return;
@@ -151,9 +165,9 @@ function PaperclipTasMain(){
         var autoClipperCp = this.calAutoClipperRate() / clipperCost;
         var megaClipperCp = this.calMegaClipperRate() / megaClipperCost;
         if(autoClipperCp>megaClipperCp){
-            return "megaclipper";
-        }else{
             return "autoclipper";
+        }else{
+            return "megaclipper";
         }
     };
     
