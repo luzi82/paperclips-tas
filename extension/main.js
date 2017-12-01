@@ -131,11 +131,16 @@ function PaperclipTasMain(){
         if(this.stage!="human")return;
         
         // buy market
-        var maxClipperCost = clipperCost;
-        if(megaClipperFlag==1){
-            maxClipperCost=Math.max(maxClipperCost,megaClipperCost);
-        }
-        if(adCost<megaClipperCost){
+        var shouldBuyMarket=false;
+        do{
+            if((clipRate-avgSales)&&(margin<0.015)){shouldBuyMarket=true;break;} // over produce
+            var maxClipperCost = clipperCost;
+            if(megaClipperFlag==1){
+                maxClipperCost=Math.max(maxClipperCost,megaClipperCost);
+            }
+            if(adCost<megaClipperCost){shouldBuyMarket=true;break;}
+        }while(false);
+        if(shouldBuyMarket){
             if(funds<(adCost+wireCost))return;
             buyAds();
             return;
