@@ -15,6 +15,8 @@ function PaperclipTasMain(){
         this.autoPrice();
         this.highlightBestCliper();
         this.autoBuyCliper();
+        this.trust100();
+        this.autoInvest();
         
         // earth
         this.autoMakeFarm();
@@ -28,6 +30,8 @@ function PaperclipTasMain(){
         this.autoQuantum();
         this.autoTournament();
         this.watchScore();
+        this.autoProject();
+        this.autoComputationalResources();
         
         this.tickEnd();
     };
@@ -184,6 +188,55 @@ function PaperclipTasMain(){
         }
     };
     
+    this.lastT100 = 0;
+    this.trust100 = function(){
+        if(this.stage!="human")return;
+        if(trust>=100)return;
+        if(this.tickNow < this.lastT100)return;
+        
+        var tt = trust;
+        var p40done = project40.flag;
+        var p37done = project37.flag;
+        var p38done = project38.flag;
+        var p40bb = bribe;
+        var cost = 0;
+        
+        while(tt<100){
+            if(p40done==0){
+                cost+=500000;
+                p40done=1;
+            }else if(p37done==0){
+                cost+=1000000;
+                p37done=1;
+            }else if(p40bb<10000000){
+                cost+=p40bb;
+                p40bb*=2;
+            }else if(p38done==0){
+                cost+=10000000;
+                p38done=1;
+            }else{
+                cost+=p40bb;
+                p40bb*=2;
+            }
+            ++tt;
+        }
+        
+        console.log("t100 cost="+spellf(cost));
+        this.lastT100 = this.tickNow + 1000;
+    };
+    
+    this.autoInvest = function(){
+        if(!this.getCtrlBool("pctas_ctrl_human_auto_invest"))return;
+        if(this.stage!="human")return;
+        if(investmentEngineFlag==0)return;
+        if((portTotal>0)&&(funds>wireCost)&&(stockGainThreshold>0.501)){
+            investDeposit();
+        }
+        if(yomi>investUpgradeCost){
+            investUpgrade();
+        }
+    };
+    
     this.autoTournament = function(){
         if(!this.getCtrlBool("pctas_ctrl_common_auto_yomi"))return;
         if(strategyEngineFlag==0)return;
@@ -239,6 +292,7 @@ function PaperclipTasMain(){
     
     this.autoMakeFarm = function(){
         if(this.stage!="earth")return;
+        if(!this.getCtrlBool("pctas_ctrl_earth_autoearth"))return;
         if(project127.flag==0)return;
         if(unusedClips<farmCost)return;
         var supply = this.calPowerSupply();
@@ -267,16 +321,43 @@ function PaperclipTasMain(){
         if(wireProductionFlag==0)return;
         if(wireDroneFlag==0)return;
         if(factoryFlag==0)return;
-        if(availableMatter<=0)return;
         if(this.calPowerSupply()<this.calPowerDemand())return;
 
         var factoryOutput = this.calFactoryOutput(factoryLevel);
         var harvesterOutput = this.calHarvesterOutput(harvesterLevel);
         var wireOutput = this.calWireOutput(wireDroneLevel);
         
-        var outputMin = Math.min(factoryOutput,harvesterOutput,wireOutput);
-        var outputMax = Math.max(factoryOutput,harvesterOutput,wireOutput);
-        if(harvesterOutput<=outputMin){
+        var outputMin = this.SEXDECILLION;
+        if(availableMatter>0)                    {outputMin=Math.min(outputMin,harvesterOutput);}
+        if(availableMatter+acquiredMatter>0)     {outputMin=Math.min(outputMin,wireOutput);}
+        if(availableMatter+acquiredMatter+wire>0){outputMin=Math.min(outputMin,factoryOutput);}
+
+        var outputMax = 0;
+        if(availableMatter>0)                    {outputMax=Math.max(outputMax,harvesterOutput);}
+        if(availableMatter+acquiredMatter>0)     {outputMax=Math.max(outputMax,wireOutput);}
+        if(availableMatter+acquiredMatter+wire>0){outputMax=Math.max(outputMax,factoryOutput);}
+        
+        // move slider to solve problem
+        if(swarmFlag==1){
+            if((factoryOutput<=outputMin)&&(this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_think")&&(parseInt(sliderPos)<199)){
+                sliderPos=parseInt(sliderPos);
+                sliderPos+=10;
+                sliderPos=Math.min(199,sliderPos);
+                sliderElement.value=sliderPos;
+                return;
+            }
+            if( (availableMatter+acquiredMatter>0)&&
+                ((harvesterOutput<=outputMin)||(wireOutput<=outputMin))&&
+                (this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_work")&&(parseInt(sliderPos)>0)){
+                sliderPos=parseInt(sliderPos);
+                sliderPos-=10;
+                sliderPos=Math.max(0,sliderPos);
+                sliderElement.value=sliderPos;
+                return;
+            }
+        }
+        
+        if((availableMatter>0)&&(harvesterOutput<=outputMin)){
             if(unusedClips>=p1000h*20){
                 makeHarvester(1000);
             }else if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+618)<outputMax)){
@@ -293,7 +374,7 @@ function PaperclipTasMain(){
                 makeHarvester(1);
             }
         }
-        if(wireOutput<=outputMin){
+        if((availableMatter+acquiredMatter>0)&&(wireOutput<=outputMin)){
             if(unusedClips>=p1000w*20){
                 makeWireDrone(1000);
             }else if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+618)<outputMax)){
@@ -310,23 +391,11 @@ function PaperclipTasMain(){
                 makeWireDrone(1);
             }
         }
-        if(factoryOutput<=outputMin){
-            if((swarmFlag==1)&&(parseInt(sliderPos)<199)){
-                sliderPos=parseInt(sliderPos);
-                sliderPos+=10;
-                sliderPos=Math.min(199,sliderPos);
-                sliderElement.value=sliderPos;
-            }else{
-                do{ // for break
-                    if(activeProjects.indexOf(project102)>=0){
-                        if(outputMin*60>=1000000000000000000000){
-                            break;
-                        }
-                    }
-                    if(unusedClips<factoryCost){break;}
-                    makeFactory();
-                }while(false);
-            }
+        if((availableMatter+acquiredMatter+wire>0)&&(factoryOutput<=outputMin)){
+            do{ // for break
+                if(unusedClips<factoryCost){break;}
+                makeFactory();
+            }while(false);
         }
     };
     this.calFactoryOutput=function(_factoryLevel){
@@ -368,7 +437,7 @@ function PaperclipTasMain(){
         }
         
         if(this.tickNow<this.autoSpaceTimeout)return;
-        var tarSpeed=1;
+        var tarSpeed=0;
         var tarNav=1;
         var tarRep=0;
         var tarHaz=0;
@@ -378,12 +447,20 @@ function PaperclipTasMain(){
         var tarCombat=0;
         
         var remainTrust = probeTrust;
-        remainTrust-=tarSpeed;
         remainTrust-=tarNav;
         if(project131.flag==1){
-            tarCombat=6;
-            remainTrust-=tarCombat;
+            if(attackSpeedFlag){
+                tarSpeed=this.bestSpeedCombat(8);
+                tarCombat=8-tarSpeed;
+            }else{
+                tarSpeed=1;
+                tarCombat=6;
+            }
+        }else{
+            tarSpeed=1;
         }
+        remainTrust-=tarCombat;
+        remainTrust-=tarSpeed;
         
         var xRateOutput = this.calXRateOutput();
         var harvesterOutput = this.calHarvesterOutput(harvesterLevel);
@@ -393,9 +470,14 @@ function PaperclipTasMain(){
         var maxOutput = Math.max(harvesterOutput,wireOutput,factoryOutput);
         maxOutput = Math.min(maxOutput,xRateOutput);
         
-        if(factoryOutput<maxOutput){tarFac++;remainTrust--;}
-        if(wireOutput<maxOutput){tarWire++;remainTrust--;}
-        if(harvesterOutput<maxOutput){tarHarv++;remainTrust--;}
+        var minOutput = Math.min(harvesterOutput,wireOutput,factoryOutput,xRateOutput);
+        
+        //if(factoryOutput<maxOutput){tarFac++;remainTrust--;}
+        //if(wireOutput<maxOutput){tarWire++;remainTrust--;}
+        //if(harvesterOutput<maxOutput){tarHarv++;remainTrust--;}
+        if(factoryOutput<=minOutput){tarFac++;remainTrust--;}
+        if(wireOutput<=minOutput){tarWire++;remainTrust--;}
+        if(harvesterOutput<=minOutput){tarHarv++;remainTrust--;}
         
         tarRep=this.bestRepHaz(remainTrust);
         remainTrust-=tarRep;
@@ -474,24 +556,162 @@ function PaperclipTasMain(){
         return -amount;
     };
     
+    this.bestSpeedCombat=function(trust){
+        var ii=0;
+        var bestSpeed=1;
+        var bestScore=-999; // score=[-1,1]
+        for(ii=1;ii<=trust;++ii){
+            var dieChance = this.combatDieChance(ii,attackSpeedFlag,drifterCombat);
+            var killChance = this.combatKillChance(trust-ii,probeCombatBaseRate);
+            var score = (killChance*(1-dieChance))-((1-killChance)*dieChance);
+            if(score<=bestScore)continue;
+            bestSpeed=ii;
+            bestScore=score;
+        }
+        return bestSpeed;
+    };
+    this.combatDieChance=function(_probeSpeed,_attackSpeedFlag,_drifterCombat){
+        var dX = _drifterCombat;
+        var ooda = 0;
+        if (_attackSpeedFlag == 1){
+            ooda = _probeSpeed * .2;
+        }
+        var chance = 0.5; // battleDEATH_THRESHOLD
+        chance += ooda;
+        chance /= ((1)*.5);
+        chance /= dX;
+
+        chance = 1-chance;
+        chance = Math.min(1,chance);
+        chance = Math.max(0,chance);
+        
+        return chance;
+    };
+    this.combatKillChance=function(_probeCombat,_probeCombatBaseRate){
+        var pX = _probeCombat * _probeCombatBaseRate;
+        
+        var chance = 0.5; // battleDEATH_THRESHOLD
+        chance /= ((1)*.5);
+        chance -= (_probeCombat * .1);
+        chance /= pX;
+        
+        chance = 1-chance;
+        chance = Math.min(1,chance);
+        chance = Math.max(0,chance);
+        
+        return chance;
+    };
+    
     this.autoSpaceProcessor=function(){
         if(this.stage!="space")return;
-        if(swarmGifts>0){
+        if((memory>=300)&&(swarmGifts>0)){
             addProc();
         }
     };
     
+    this.autoProject=function(){
+        if(!this.getCtrlBool("pctas_ctrl_common_auto_project"))return;
+        if(projectsFlag==0)return;
+        
+        var ii;
+        for(ii=0;ii<activeProjects.length;ii++){
+            var proj=activeProjects[ii];
+            if(!proj.cost())continue;
+            if(proj==project148)continue; // reject
+            if(proj==project219)continue; // Xavier Re-initialization
+            console.log("auto project "+proj.title);
+            proj.effect();
+            break;
+        }
+    };
+    
+    this.autoComputationalResources=function(){
+        if(!this.getCtrlBool("pctas_ctrl_autoComputationalResources"))return;
+        var ii;
+        
+        var trustRemain = 0;
+        if(this.stage=="human"){
+            trustRemain = trust;
+        }
+        
+        trustRemain -= processors;
+        trustRemain -= memory;
+        
+        if(trustRemain<=0)return;
+        
+        var tarProc=0;
+        var tarMem =0;
+        for(ii=0;ii<this.autoComputationalResourcesCompList.length;++ii){
+            var procMem = this.autoComputationalResourcesCompList[ii];
+            tarProc = procMem[0];
+            tarMem  = procMem[1];
+            if(processors<tarProc)break;
+            if(memory<tarMem)break;
+            if(memory+processors<tarProc+tarMem)break;
+        }
+        
+        tarProc -= processors;
+        tarProc = Math.max(0,tarProc);
+        tarMem  -= memory;
+        tarMem  = Math.max(0,tarMem);
+        
+        var tarTotal = tarProc+tarMem;
+        if(tarTotal<=0)return;
+
+        if(tarProc<=0){ addMem();return;};
+        if(tarMem <=0){addProc();return;};
+
+        var ran = tarTotal * Math.random();
+        if(ran<tarProc){addProc();return;}
+        else{addMem();return;}
+    };
+    this.autoComputationalResourcesCompList=[
+        [5,10],
+        [20,80],
+        [250,250],
+        [300,300],
+        [Number.MAX_SAFE_INTEGER-1000,310],
+    ];
+    
     this.getCtrlBool=function(key){
-        return document.getElementById(key).checked;
+        var ii;
+        var ele = document.getElementById(key);
+        if(ele!=null){
+            if(ele.type=="checkbox"){
+                return document.getElementById(key).checked;
+            }
+        };
+        var eleList = document.getElementsByName(key);
+        if(eleList!=null){
+            for(ii=0;ii<eleList.length;++ii){
+                ele = eleList[ii];
+                if((ele.type=="radio")&&(ele.checked)){
+                    return ele.value;
+                }
+            }
+        }
     };
     
     this.initCtrl=function(){
         if(this.lastStage!="init")return;
+        var ii;
         for(var key in this.ctrlDefault){
             var value = this.ctrlDefault[key];
-            var inputType = document.getElementById(key).type;
-            if(inputType=="checkbox"){
-                document.getElementById(key).checked = value;
+            var ele = document.getElementById(key);
+            if(ele!=null){
+                var inputType = ele.type;
+                if(inputType=="checkbox"){
+                    ele.checked = value;
+                }
+            }
+            var eleList = document.getElementsByName(key);
+            if(eleList!=null){
+                for(ii=0;ii<eleList.length;++ii){
+                    ele = eleList[ii];
+                    if((ele.type=="radio")&&(ele.value==value)){
+                        ele.checked = true;
+                    }
+                }
             }
         }
     }
@@ -505,12 +725,18 @@ function PaperclipTasMain(){
     this.ctrlDefault={
         pctas_ctrl_common_auto_yomi: true,
         pctas_ctrl_common_auto_strat: true,
+        pctas_ctrl_common_auto_project: false,
+        pctas_ctrl_autoComputationalResources: false,
 
         pctas_ctrl_human_auto_buy_wire: true,
         pctas_ctrl_human_auto_buy_clipper: true,
+        pctas_ctrl_human_auto_invest: false,
         
         pctas_ctrl_earth_autoearth: true,
+        pctas_ctrl_earth_autoslider: "max_work",
     };
+    
+    this.SEXDECILLION = 1000000000000000000000000000000000000000000000000000;
 
 }
 
