@@ -277,30 +277,34 @@ function PaperclipTasMain(){
         var outputMin = Math.min(factoryOutput,harvesterOutput,wireOutput);
         var outputMax = Math.max(factoryOutput,harvesterOutput,wireOutput);
         if(harvesterOutput<=outputMin){
-            if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+999)<outputMax)){
+            if(unusedClips>=p1000h*20){
+                makeHarvester(1000);
+            }else if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+618)<outputMax)){
                 makeHarvester(1000);
             }else if(unusedClips>=p1000h){
                 makeHarvester(100);
-            }else if((unusedClips>=p100h)&&(this.calHarvesterOutput(harvesterLevel+99)<outputMax)){
+            }else if((unusedClips>=p100h)&&(this.calHarvesterOutput(harvesterLevel+62)<outputMax)){
                 makeHarvester(100);
             }else if(unusedClips>=p100h){
                 makeHarvester(10);
-            }else if((unusedClips>=p10h)&&(this.calHarvesterOutput(harvesterLevel+9)<outputMax)){
+            }else if((unusedClips>=p10h)&&(this.calHarvesterOutput(harvesterLevel+6)<outputMax)){
                 makeHarvester(10);
             }else if(unusedClips>=harvesterCost){
                 makeHarvester(1);
             }
         }
         if(wireOutput<=outputMin){
-            if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+999)<outputMax)){
+            if(unusedClips>=p1000w*20){
+                makeWireDrone(1000);
+            }else if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+618)<outputMax)){
                 makeWireDrone(1000);
             }else if(unusedClips>=p1000w){
                 makeWireDrone(100);
-            }else if((unusedClips>=p100w)&&(this.calWireOutput(wireDroneLevel+99)<outputMax)){
+            }else if((unusedClips>=p100w)&&(this.calWireOutput(wireDroneLevel+62)<outputMax)){
                 makeWireDrone(100);
             }else if(unusedClips>=p100w){
                 makeWireDrone(10);
-            }else if((unusedClips>=p10w)&&(this.calWireOutput(wireDroneLevel+9)<outputMax)){
+            }else if((unusedClips>=p10w)&&(this.calWireOutput(wireDroneLevel+6)<outputMax)){
                 makeWireDrone(10);
             }else if(unusedClips>=wireDroneCost){
                 makeWireDrone(1);
@@ -357,6 +361,12 @@ function PaperclipTasMain(){
     this.autoSpaceTimeout=0;
     this.autoSpace=function(){
         if(this.stage!="space")return;
+        
+        if(parseInt(sliderPos)<199){
+            sliderPos=199;
+            sliderElement.value=sliderPos;
+        }
+        
         if(this.tickNow<this.autoSpaceTimeout)return;
         var tarSpeed=1;
         var tarNav=1;
@@ -380,15 +390,17 @@ function PaperclipTasMain(){
         var wireOutput = this.calWireOutput(wireDroneLevel);
         var factoryOutput = this.calFactoryOutput(factoryLevel);
         
-        if(wireOutput>factoryOutput){tarFac++;remainTrust--;}
-        else if(harvesterOutput>wireOutput){tarWire++;remainTrust--;}
-        else if(xRateOutput>harvesterOutput){tarHarv++;remainTrust--;}
+        var maxOutput = Math.max(harvesterOutput,wireOutput,factoryOutput);
+        maxOutput = Math.min(maxOutput,xRateOutput);
         
-        if(remainTrust>0){tarRep++;remainTrust--;}
-        while(remainTrust>0){
-            if(remainTrust>0){tarRep++;remainTrust--;}
-            if(remainTrust>0){tarHaz++;remainTrust--;}
-        }
+        if(factoryOutput<maxOutput){tarFac++;remainTrust--;}
+        if(wireOutput<maxOutput){tarWire++;remainTrust--;}
+        if(harvesterOutput<maxOutput){tarHarv++;remainTrust--;}
+        
+        tarRep=this.bestRepHaz(remainTrust);
+        remainTrust-=tarRep;
+        tarHaz=remainTrust;
+        remainTrust-=remainTrust;
         
         if(probeSpeed >tarSpeed ){lowerProbeSpeed();}
         if(probeNav   >tarNav   ){lowerProbeNav();}
@@ -429,6 +441,37 @@ function PaperclipTasMain(){
             if(probeCombat!=tarCombat){break;}
             this.autoSpaceTimeout=this.tickNow+2000;
         }while(false);
+    };
+    
+    this.bestRepHaz=function(trust){
+        var ii=0;
+        var bestRep=0;
+        var bestGrowRate=this.probeGrowRate(0,trust);
+        for(ii=0;ii<=trust;ii++){
+            var growRate = this.probeGrowRate(ii,trust-ii);
+            if(growRate<=bestGrowRate)continue;
+            bestRep=ii;
+            bestGrowRate=growRate;
+        }
+        return bestRep;
+    };
+    this.probeGrowRate=function(_probeRep,_probeHaz){
+        var ret = 0;
+        ret += this.probeRepFactor(_probeRep);
+        ret += this.probeHazFactor(_probeHaz);
+        return ret;
+    };
+    this.probeRepFactor=function(_probeRep){
+        var nextGen = probeCount * probeRepBaseRate * _probeRep;
+        return nextGen;
+    };
+    this.probeHazFactor=function(_probeHaz){
+        var boost = Math.pow(_probeHaz, 1.6);
+        var amount = probeCount * (probeHazBaseRate / ((3*boost)+1));
+        if (project129.flag == 1){
+            amount = .50 * amount;
+        }
+        return -amount;
     };
     
     this.autoSpaceProcessor=function(){
