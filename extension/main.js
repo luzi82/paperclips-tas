@@ -229,7 +229,7 @@ function PaperclipTasMain(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_invest"))return;
         if(this.stage!="human")return;
         if(investmentEngineFlag==0)return;
-        if((portTotal>0)&&(funds>wireCost)&&(stockGainThreshold>0.501)){
+        if((portTotal<=0)&&(funds>wireCost)&&(stockGainThreshold>0.501)){
             investDeposit();
         }
         if(yomi>investUpgradeCost){
