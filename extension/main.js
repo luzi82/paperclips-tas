@@ -21,10 +21,11 @@ function PaperclipTasMain(){
         // earth
         this.autoMakeFarm();
         this.autoEarth();
+        this.autoP102();
         
         // space
         this.autoSpace();
-        this.autoSpaceProcessor();
+        //this.autoSpaceProcessor();
         
         // common
         this.autoQuantum();
@@ -41,7 +42,9 @@ function PaperclipTasMain(){
     this.stage = "unknown";
     this.tickBegin=function(){
         this.tickNow = Date.now();
-        if(humanFlag==1){
+        if(milestoneFlag>=15){
+            this.stage = "end";
+        }else if(humanFlag==1){
             this.stage = "human";
         }else if(spaceFlag==1){
             this.stage = "space";
@@ -102,6 +105,7 @@ function PaperclipTasMain(){
     };
     
     this.autoQuantum=function(){
+        if(this.stage=="end")return;
         var calQ = this.calQComp();
         if(calQ>0){
             qComp();
@@ -229,8 +233,12 @@ function PaperclipTasMain(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_invest"))return;
         if(this.stage!="human")return;
         if(investmentEngineFlag==0)return;
-        if((portTotal<=0)&&(funds>wireCost)&&(stockGainThreshold>0.501)){
+        investStratElement.value = "med";
+        if((portTotal<=0)&&(funds>1000)&&(wire>clipRate*10)&&(investLevel>=1)){
             investDeposit();
+        }
+        if(secTotal>=300000000){
+            investWithdraw();
         }
         if(yomi>investUpgradeCost){
             investUpgrade();
@@ -239,6 +247,7 @@ function PaperclipTasMain(){
     
     this.autoTournament = function(){
         if(!this.getCtrlBool("pctas_ctrl_common_auto_yomi"))return;
+        if(this.stage=="end")return;
         if(strategyEngineFlag==0)return;
         if(tourneyInProg==1)return;
         if(operations<tourneyCost)return;
@@ -260,6 +269,7 @@ function PaperclipTasMain(){
     this.lastWatch_tourneyLvl = 0;
     this.watchScore = function(){
         if(!this.getCtrlBool("pctas_ctrl_common_auto_strat"))return;
+        if(this.stage=="end")return;
         if(strategyEngineFlag==0)return;
 
         if(tourneyInProg==0)return;
@@ -298,10 +308,32 @@ function PaperclipTasMain(){
         var supply = this.calPowerSupply();
         var demand = this.calPowerDemand();
         var diff = demand + (factoryPowerRate/100) - supply;
-        if(diff<=0)return;
-        diff /= (farmRate/100);
-        diff = Math.ceil(diff);
-        makeFarm(diff);
+        if(diff>0){
+            diff /= (farmRate/100);
+            diff = Math.ceil(diff);
+            makeFarm(diff);
+        }
+        
+        var cap = batteryLevel * batterySize;
+        if((storedPower>=cap)&&(unusedClips >= batteryCost)&&(batteryLevel<1000)){
+            var newBatteryCount = 1;
+            if(availableMatter+acquiredMatter+wire<=0){
+                newBatteryCount = 1000-batteryLevel;
+            }
+            newBatteryCount = Math.max(0,newBatteryCount);
+            if((newBatteryCount>=100)&&(unusedClips >= p100b)){
+                newBatteryCount=100;
+            }else if((newBatteryCount>=10)&&(unusedClips >= p10b)){
+                newBatteryCount=10;
+            }else if((newBatteryCount>=1)&&(unusedClips >= batteryCost)){
+                newBatteryCount=1;
+            }else{
+                newBatteryCount=0;
+            }
+            if(newBatteryCount>0){
+                makeBattery(newBatteryCount);
+            }
+        }
     };
     
     this.calPowerSupply=function(){
@@ -356,6 +388,10 @@ function PaperclipTasMain(){
                 return;
             }
         }
+        if(this.getCtrlBool("pctas_ctrl_earth_autoslider")=="mid"){
+            sliderPos=100;
+            sliderElement.value=sliderPos;
+        }
         
         if((availableMatter>0)&&(harvesterOutput<=outputMin)){
             if(unusedClips>=p1000h*20){
@@ -397,6 +433,9 @@ function PaperclipTasMain(){
                 makeFactory();
             }while(false);
         }
+        if((availableMatter                    <=0)&&(harvesterLevel>0)){harvesterReboot();}
+        if((availableMatter+acquiredMatter     <=0)&&(wireDroneLevel>0)){wireDroneReboot();}
+        if((availableMatter+acquiredMatter+wire<=0)&&(factoryLevel>0  )){factoryReboot();}
     };
     this.calFactoryOutput=function(_factoryLevel){
         var fbst = 1;
@@ -427,9 +466,35 @@ function PaperclipTasMain(){
         return Math.floor(probeCount) * probeXBaseRate * probeSpeed * probeNav;
     };
     
+    this.autoP102=function(){
+        if(this.stage!="earth")return;
+        if(!this.getCtrlBool("pctas_ctrl_earth_p102"))return;
+        if(activeProjects.indexOf(project102)<0)return;
+        if(project102.flag==1)return;
+        if(factoryLevel<=0)return;
+        
+        var cost = 0;
+        cost += 1000000000000000000000; // p102
+        cost += 100000000; // first factory
+        if(unusedClips + factoryBill < cost)return;
+        
+        factoryReboot();
+    };
+    
     this.autoSpaceTimeout=0;
     this.autoSpace=function(){
         if(this.stage!="space")return;
+        
+        if(!(yomi < probeTrustCost || probeTrust >= maxTrust)){
+            increaseProbeTrust();
+        }
+        if(!(honor<maxTrustCost)){
+            increaseMaxTrust();
+        }
+        
+        if((probeCount<=100)&&(!(unusedClips<probeCost))){
+            makeProbe();
+        }
         
         if(parseInt(sliderPos)<199){
             sliderPos=199;
@@ -617,7 +682,29 @@ function PaperclipTasMain(){
         for(ii=0;ii<activeProjects.length;ii++){
             var proj=activeProjects[ii];
             if(!proj.cost())continue;
+            if(this.stage=="end"){
+                if(proj==project140){proj.effect();break;}
+                if(proj==project141){proj.effect();break;}
+                if(proj==project142){proj.effect();break;}
+                if(proj==project143){proj.effect();break;}
+                if(proj==project144){proj.effect();break;}
+                if(proj==project145){proj.effect();break;}
+                if(proj==project146){proj.effect();break;}
+                var choice = this.getCtrlBool("pctas_ctrl_end_choice");
+                if(choice=="balance"){
+                    if(prestigeU<prestigeS){choice = "demand";}
+                    else{choice = "creative";}
+                }
+                if((choice=="demand")&&(proj==project147)){proj.effect();break;} // accept
+                if((choice=="demand")&&(proj==project200)){proj.effect();break;} // demand
+                if((choice=="creative")&&(proj==project147)){proj.effect();break;} // accept
+                if((choice=="creative")&&(proj==project201)){proj.effect();break;} // creativity
+                continue;
+            }
+            if(proj==project147)continue; // accept
             if(proj==project148)continue; // reject
+            if(proj==project200)continue; // reset +10 demand
+            if(proj==project201)continue; // reset +10 creativity
             if(proj==project219)continue; // Xavier Re-initialization
             console.log("auto project "+proj.title);
             proj.effect();
@@ -627,6 +714,7 @@ function PaperclipTasMain(){
     
     this.autoComputationalResources=function(){
         if(!this.getCtrlBool("pctas_ctrl_autoComputationalResources"))return;
+        if(this.stage=="end")return;
         var ii;
         
         var trustRemain = 0;
@@ -636,6 +724,8 @@ function PaperclipTasMain(){
         
         trustRemain -= processors;
         trustRemain -= memory;
+        trustRemain = Math.max(0,trustRemain);
+        trustRemain += swarmGifts;
         
         if(trustRemain<=0)return;
         
@@ -668,8 +758,12 @@ function PaperclipTasMain(){
     this.autoComputationalResourcesCompList=[
         [5,10],
         [20,80],
+        [100,100],
+        [125,125],
+        [200,200],
         [250,250],
         [300,300],
+        [310,310],
         [Number.MAX_SAFE_INTEGER-1000,310],
     ];
     
@@ -725,15 +819,18 @@ function PaperclipTasMain(){
     this.ctrlDefault={
         pctas_ctrl_common_auto_yomi: true,
         pctas_ctrl_common_auto_strat: true,
-        pctas_ctrl_common_auto_project: false,
-        pctas_ctrl_autoComputationalResources: false,
+        pctas_ctrl_common_auto_project: true, //false,
+        pctas_ctrl_autoComputationalResources: true, //false,
 
         pctas_ctrl_human_auto_buy_wire: true,
         pctas_ctrl_human_auto_buy_clipper: true,
-        pctas_ctrl_human_auto_invest: false,
+        pctas_ctrl_human_auto_invest: true, //false,
         
         pctas_ctrl_earth_autoearth: true,
-        pctas_ctrl_earth_autoslider: "max_work",
+        pctas_ctrl_earth_p102: true, // false
+        pctas_ctrl_earth_autoslider: "max_think",
+        
+        pctas_ctrl_end_choice: "balance",
     };
     
     this.SEXDECILLION = 1000000000000000000000000000000000000000000000000000;
