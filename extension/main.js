@@ -406,8 +406,8 @@ function PaperclipTasMain(){
         var improveHarv = false;
         var improveWire = false;
         var improveFac  = false;
-        var more_think = (this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_think")&&(parseInt(sliderPos)<199);
-        var more_work  = (this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_work" )&&(parseInt(sliderPos)>1);
+        var more_think = (swarmFlag==1)&&(this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_think")&&(parseInt(sliderPos)<199);
+        var more_work  = (swarmFlag==1)&&(this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_work" )&&(parseInt(sliderPos)>1);
         
         if(availableMatter+acquiredMatter+wire<=0){
             // no build
