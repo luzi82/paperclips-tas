@@ -377,7 +377,7 @@ function PaperclipTasMain(){
         if(swarmFlag==1){
             if((factoryOutput<=outputMin)&&(this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_think")&&(parseInt(sliderPos)<199)){
                 sliderPos=parseInt(sliderPos);
-                sliderPos+=10;
+                sliderPos+=1;
                 sliderPos=Math.min(199,sliderPos);
                 sliderElement.value=sliderPos;
                 return;
@@ -386,8 +386,8 @@ function PaperclipTasMain(){
                 ((harvesterOutput<=outputMin)||(wireOutput<=outputMin))&&
                 (this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_work")&&(parseInt(sliderPos)>0)){
                 sliderPos=parseInt(sliderPos);
-                sliderPos-=10;
-                sliderPos=Math.max(0,sliderPos);
+                sliderPos-=1;
+                sliderPos=Math.max(1,sliderPos);
                 sliderElement.value=sliderPos;
                 return;
             }
