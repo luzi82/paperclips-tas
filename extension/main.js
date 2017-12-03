@@ -713,6 +713,7 @@ function PaperclipTasMain(){
             if(proj==project135){ // Release the HypnoDrones
                 var limit = 0;
                 limit +=  10000000; // earth power
+                limit +=   1000000; // earth battery
                 limit +=   1000000; // earth matter drone
                 limit +=   1000000; // earth wire drone
                 limit += 100000000; // earth factory
