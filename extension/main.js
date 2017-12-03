@@ -15,7 +15,7 @@ function PaperclipTasMain(){
         this.autoPrice();
         this.highlightBestCliper();
         this.autoBuyCliper();
-        this.trust100();
+        //this.trust100();
         this.autoInvest();
         
         // earth
@@ -233,8 +233,12 @@ function PaperclipTasMain(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_invest"))return;
         if(this.stage!="human")return;
         if(investmentEngineFlag==0)return;
-        investStratElement.value = "med";
-        if((portTotal<=0)&&(funds>1000)&&(wire>clipRate*10)&&(investLevel>=1)){
+        if(stockGainThreshold<0.6){
+            investStratElement.value = "med";
+        }else{
+            investStratElement.value = "hi";
+        }
+        if((portTotal<=0)&&(funds>1000)&&(wire>clipRate*10)&&(stockGainThreshold>=0.51)){
             investDeposit();
         }
         if(secTotal>=300000000){
@@ -706,6 +710,14 @@ function PaperclipTasMain(){
             if(proj==project200)continue; // reset +10 demand
             if(proj==project201)continue; // reset +10 creativity
             if(proj==project219)continue; // Xavier Re-initialization
+            if(proj==project135){ // Release the HypnoDrones
+                var limit = 0;
+                limit +=  10000000; // earth power
+                limit +=   1000000; // earth matter drone
+                limit +=   1000000; // earth wire drone
+                limit += 100000000; // earth factory
+                if(clips<limit)continue;
+            }
             console.log("auto project "+proj.title);
             proj.effect();
             break;
