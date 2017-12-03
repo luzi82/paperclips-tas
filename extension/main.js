@@ -392,7 +392,7 @@ function PaperclipTasMain(){
                 bestSlider = ii;
                 best_wireHarvMin = wireHarvMin;
             }
-            console.log("bestSlider "+bestSlider);
+            //console.log("bestSlider "+bestSlider);
             //var changeSlider = false;
             //if((this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_think")&&(parseInt(sliderPos)<bestSlider)){changeSlider=true;}
             //if((this.getCtrlBool("pctas_ctrl_earth_autoslider")=="max_work" )&&(parseInt(sliderPos)>bestSlider)){changeSlider=true;}
