@@ -556,7 +556,7 @@ function PaperclipTasMain(){
         
         var remainTrust = probeTrust;
         remainTrust-=tarNav;
-        if(project131.flag==1){
+        if((project131.flag==1)&&(probesLostCombat >= 10000000)){ // need glory appear
             if(attackSpeedFlag){
                 tarSpeed=this.bestSpeedCombat(8);
                 tarCombat=8-tarSpeed;
@@ -749,6 +749,11 @@ function PaperclipTasMain(){
             if(proj==project200)continue; // reset +10 demand
             if(proj==project201)continue; // reset +10 creativity
             if(proj==project219)continue; // Xavier Re-initialization
+            if(proj==project120){ // do ooda after glory appear
+                if(probesLostCombat < 10000000){
+                    continue;
+                }
+            }
             if(proj==project135){ // Release the HypnoDrones
                 var limit = 0;
                 limit +=  10000000; // earth power
