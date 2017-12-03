@@ -33,6 +33,7 @@ function PaperclipTasMain(){
         this.watchScore();
         this.autoProject();
         this.autoComputationalResources();
+        this.saveSwarm();
         
         this.tickEnd();
     };
@@ -749,6 +750,7 @@ function PaperclipTasMain(){
             if(proj==project200)continue; // reset +10 demand
             if(proj==project201)continue; // reset +10 creativity
             if(proj==project219)continue; // Xavier Re-initialization
+            if(proj==project217)continue; // Quantum Temporal Reversion
 
             if(proj==project135){ // Release the HypnoDrones
                 var limit = 0;
@@ -840,6 +842,24 @@ function PaperclipTasMain(){
         [316,316],
         [Number.MAX_SAFE_INTEGER-1000,310],
     ];
+    
+    this.saveSwarm=function(){
+        if( (disorgFlag==1)&&
+            (swarmStatus==5)&&
+            (swarmStatusElement.innerHTML=="Disorganized")&&
+            (synchButtonDivElement.style.display=="")&&
+            (yomi>=synchCost)&&
+            (btnSynchSwarmElement.disabled==false)
+        ){synchSwarm();}
+
+        if( (boredomFlag==1)&&
+            (swarmStatus==3)&&
+            (swarmStatusElement.innerHTML=="Bored")&&
+            (entertainButtonDivElement.style.display=="")&&
+            (creativity>=entertainCost)&&
+            (btnEntertainSwarmElement.disabled==false)
+        ){entertainSwarm();}
+    };
     
     this.getCtrlBool=function(key){
         var ii;
