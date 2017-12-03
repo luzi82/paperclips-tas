@@ -749,11 +749,7 @@ function PaperclipTasMain(){
             if(proj==project200)continue; // reset +10 demand
             if(proj==project201)continue; // reset +10 creativity
             if(proj==project219)continue; // Xavier Re-initialization
-            if(proj==project120){ // do ooda after "Name the battles" appear
-                if(probesLostCombat < 10000000){
-                    continue;
-                }
-            }
+
             if(proj==project135){ // Release the HypnoDrones
                 var limit = 0;
                 limit +=  10000000; // earth power
@@ -763,6 +759,27 @@ function PaperclipTasMain(){
                 limit += 100000000; // earth factory
                 if(clips<limit)continue;
             }
+
+            if(proj==project120){ // do ooda after "Name the battles" appear
+                if(probesLostCombat < 10000000){
+                    continue;
+                }
+            }
+            
+            if(proj==project133){
+                // do 132 first if 132 ready
+                var good = false;
+                good = good || (project132.flag==1);
+                good = good || (processors<250);
+                good = good || (unusedClips < Math.pow(10,30)*50);
+                good = good || (project121.flag==0);
+                good = good || ((honor+10000>=maxTrustCost)&&(threnodyCost<125000)); // if max trust upgrade avaliable next
+                if(!good)continue;
+                
+                // save yomi for increase max trust
+                if(probeTrust<maxTrust)continue;
+            }
+
             console.log("auto project "+proj.title);
             proj.effect();
             break;
@@ -820,7 +837,7 @@ function PaperclipTasMain(){
         [200,200],
         [250,250],
         [300,300],
-        [310,310],
+        [316,316],
         [Number.MAX_SAFE_INTEGER-1000,310],
     ];
     
