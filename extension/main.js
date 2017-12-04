@@ -442,18 +442,26 @@ function PaperclipTasMain(){
             }
         }
         
+        var tarSlider = parseInt(sliderPos);
+        if((this.getCtrlBool("pctas_ctrl_earth_autoslider")!="max_think")&&(swarmFlag==1)){
+            tarSlider = 199;
+        }
+        if((this.getCtrlBool("pctas_ctrl_earth_autoslider")!="max_work")&&(swarmFlag==1)){
+            tarSlider = 199;
+        }
+        
         if(improveHarv){
             if(unusedClips>=p1000h*20){
                 makeHarvester(1000);
-            }else if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+618,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p1000h)&&(this.calHarvesterOutput(harvesterLevel+618,tarSlider)<outputMax)){
                 makeHarvester(1000);
             }else if(unusedClips>=p1000h){
                 makeHarvester(100);
-            }else if((unusedClips>=p100h)&&(this.calHarvesterOutput(harvesterLevel+62,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p100h)&&(this.calHarvesterOutput(harvesterLevel+62,tarSlider)<outputMax)){
                 makeHarvester(100);
             }else if(unusedClips>=p100h){
                 makeHarvester(10);
-            }else if((unusedClips>=p10h)&&(this.calHarvesterOutput(harvesterLevel+6,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p10h)&&(this.calHarvesterOutput(harvesterLevel+6,tarSlider)<outputMax)){
                 makeHarvester(10);
             }else if(unusedClips>=harvesterCost){
                 makeHarvester(1);
@@ -462,15 +470,15 @@ function PaperclipTasMain(){
         if(improveWire){
             if(unusedClips>=p1000w*20){
                 makeWireDrone(1000);
-            }else if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+618,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p1000w)&&(this.calWireOutput(wireDroneLevel+618,tarSlider)<outputMax)){
                 makeWireDrone(1000);
             }else if(unusedClips>=p1000w){
                 makeWireDrone(100);
-            }else if((unusedClips>=p100w)&&(this.calWireOutput(wireDroneLevel+62,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p100w)&&(this.calWireOutput(wireDroneLevel+62,tarSlider)<outputMax)){
                 makeWireDrone(100);
             }else if(unusedClips>=p100w){
                 makeWireDrone(10);
-            }else if((unusedClips>=p10w)&&(this.calWireOutput(wireDroneLevel+6,parseInt(sliderPos))<outputMax)){
+            }else if((unusedClips>=p10w)&&(this.calWireOutput(wireDroneLevel+6,tarSlider)<outputMax)){
                 makeWireDrone(10);
             }else if(unusedClips>=wireDroneCost){
                 makeWireDrone(1);
