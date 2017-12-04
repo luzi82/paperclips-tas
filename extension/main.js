@@ -757,7 +757,8 @@ function PaperclipTasMain(){
             if(proj==project219)continue; // Xavier Re-initialization
             if(proj==project217)continue; // Quantum Temporal Reversion
 
-            if(proj==project135){ // Release the HypnoDrones
+            if(proj==project35){ // Release the HypnoDrones
+                if(processors+memory<trust)continue;
                 var limit = 0;
                 limit +=  10000000; // earth power
                 limit +=   1000000; // earth battery
