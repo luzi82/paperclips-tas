@@ -734,6 +734,8 @@ function PaperclipTasMain(){
     this.autoProject=function(){
         if(!this.getCtrlBool("pctas_ctrl_common_auto_project"))return;
         if(projectsFlag==0)return;
+        if(project200.flag==1)return;
+        if(project201.flag==1)return;
         
         var ii;
         for(ii=0;ii<activeProjects.length;ii++){
