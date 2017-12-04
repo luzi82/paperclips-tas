@@ -788,7 +788,7 @@ function PaperclipTasMain(){
                 // do 132 first if 132 ready
                 var good = false;
                 good = good || (project132.flag==1);
-                good = good || (processors<250);
+                good = good || (memory<250);
                 good = good || (unusedClips < Math.pow(10,30)*50);
                 good = good || (project121.flag==0);
                 good = good || ((honor+10000>=maxTrustCost)&&(threnodyCost<125000)); // if max trust upgrade avaliable next
