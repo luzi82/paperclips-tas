@@ -234,12 +234,17 @@ function PaperclipTasMain(){
         if(!this.getCtrlBool("pctas_ctrl_human_auto_invest"))return;
         if(this.stage!="human")return;
         if(investmentEngineFlag==0)return;
-        if(stockGainThreshold<0.6){
+        var lowLimit = 0.509;
+        var medLimit = 0.5125;
+        var hiLimit  = 0.563;
+        if(stockGainThreshold > hiLimit){
+            investStratElement.value = "hi";
+        }else if(stockGainThreshold > medLimit){
             investStratElement.value = "med";
         }else{
-            investStratElement.value = "hi";
+            investStratElement.value = "low";
         }
-        if((portTotal<=0)&&(funds>1000)&&(wire>clipRate*10)&&(stockGainThreshold>=0.51)){
+        if((portTotal<1000)&&(funds>=1000)&&(wire>clipRate*10)&&(stockGainThreshold>=lowLimit)){
             investDeposit();
         }
         if(secTotal>=300000000){
